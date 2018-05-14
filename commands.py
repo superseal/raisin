@@ -98,13 +98,17 @@ def run_command(message_data):
         say(current_channel, 'http://www.wordreference.com/es/en/translation.asp?spen=%s' % search_term)
 
     # Random choice
-    elif said.find('@random') == 0:
-        if len(params) == 1:
-            say(current_channel, 'faggot')
-        elif len(params) > 1:
+    elif said.find('@sample') == 0:
+        if len(params) > 1:
             say(current_channel, random.choice(params))
-        else:
-            say(current_channel, random.choice([0, 1]))
+
+    elif said.find('@roll') == 0:
+        if not params:
+            max_roll = 6
+        elif len(params) == 1 and params[0].isdigit():
+            max_roll = int(params[0])
+        
+        say(current_channel, random.randint(1, max_roll))
 
     # Unit converter
     elif said.find('@conv') == 0:
