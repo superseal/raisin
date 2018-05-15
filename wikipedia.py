@@ -1,10 +1,10 @@
  # -*- coding: utf8 -*-
 
 import json
-import urllib2
+import urllib
 import re
 
-from utils import fetch_url
+from utils import requests_session
 
 # Wikipedia language code
 language = 'en'
@@ -13,7 +13,7 @@ language = 'en'
 
 # Checks if end_article is in the link list at url and returns a result
 def find_article(url, end_article):
-    json_file = fetch_url(url)
+    json_file = fetch(url)
     link_dictionary = json.load(json_file)
     
     # Handle the varying pageid key in the JSON file provided by MediaWiki
@@ -28,7 +28,7 @@ def find_article(url, end_article):
 
     # Continue if link list is not complete yet
     if 'query-continue' in list(link_dictionary):
-        continue_string = urllib2.quote(link_dictionary['query-continue']['links']['plcontinue'])
+        continue_string = urllib.parse.quote_plus(link_dictionary['query-continue']['links']['plcontinue'])
         ''' Endless appending of plcontinues, can be improved '''
         new_url = url + '&plcontinue=' + continue_string
         return find_article(new_url, end_article)
@@ -41,7 +41,7 @@ def reachable(start_article, end_article):
     global language
     host = 'http://%s.wikipedia.org/w/api.php' % language
     parameters = '?format=json&action=query&redirects&prop=links&pllimit=500&plnamespace=0&titles=' 
-    initial_url = host + parameters + urllib2.quote(start_article)
+    initial_url = host + parameters + urllib.parse.quote_plus(start_article)
     return find_article(initial_url, end_article)
 
 # Check if link chain is valid and show wrong paths
@@ -60,10 +60,10 @@ def fetch(article_name):
     global language
     host = 'http://%s.wikipedia.org/w/api.php?' % language
     parameters = 'format=json&redirects&action=query&prop=extracts&exsentences=3&explaintext=true&titles='
-    url = host + parameters + urllib2.quote(article_name)
+    url = host + parameters + urllib.parse.quote_plus(article_name)
 
-    json_file = fetch_url(url)
-    page_dictionary = json.load(json_file)
+    response = requests_session.get(url).text
+    page_dictionary = json.loads(response)
     
     # Handle the varying pageid key in the JSON file provided by MediaWiki
     pageid = list(page_dictionary['query']['pages'])[0]
@@ -72,7 +72,7 @@ def fetch(article_name):
         return "The article %s doesn't exist." % (article_name)
 
     extract = page_dictionary['query']['pages'][pageid]['extract']
-    return extract.encode('utf-8')
+    return extract
 
 # Returns title of random article
 def random_pair():
@@ -81,8 +81,8 @@ def random_pair():
     parameters = 'format=json&action=query&list=random&rnnamespace=0&rnlimit=2'
     url = host + parameters
 
-    json_file = fetch_url(url)
-    page_dictionary = json.load(json_file)
+    response = requests_session.get(url).text
+    page_dictionary = json.loads(response)
     
     return [page_dictionary['query']['random'][i]['title'].encode('utf-8') for i in (0, 1)]
 

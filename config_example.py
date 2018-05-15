@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-# Rename to config.py
+# Change these values and rename to config.py before running for the first time
 
 # IRC network (string)
 network = 'irc.freenode.net'
 
 # Channel list (string list)
-channels = ['#cat-v'] 
+channels = ['#cat-v']
 
 # Bot nickname (string)
 nickname = 'bunny'
@@ -14,4 +14,7 @@ nickname = 'bunny'
 owner = 'hurr'
 
 # Password (string)
-password = 'dicks'
+password = 'durr'
+
+# Wolfram Alpha appid
+wolfram_api_key = 'AA00B0-CC611DDDDD'

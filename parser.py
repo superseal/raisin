@@ -1,19 +1,20 @@
+import time
+import datetime
+
 from irc_common import *
 from utils import execute
 from commands import run_command
-import time
+
+# Variables inside curly braces are optional
 
 # Read line and execute commands
 def read_line(line):
-    # Variables inside curly braces are optional
+    line = line.decode("utf-8")
 
-    # Dirty but better than having "self" all over the damn code
     global logged_in
 
-    # PING messages don't start with ':'
     if line.startswith(':'):
         parse_line(line)
-
     # PING messages don't start with ':'
     else:
         # Pong
@@ -21,7 +22,6 @@ def read_line(line):
             execute('PONG %s\r\n' % line.split()[1])
 
 # Parse messages received from IRC server
-# Variables inside curly braces are optional
 def parse_line(line):
     global logged_in
 
@@ -95,18 +95,31 @@ def parse_line(line):
 
     # User commands
     elif command == 'PRIVMSG':
-        # message = ['PRIVMSG', #chan, ':' + word1, word2, word3, ...]
+        # message = ['PRIVMSG', #chan, ':' + word1, word2, ...]
         message[2] = message[2].lstrip(':')
+
         current_channel = message[1]
         if current_channel == nickname:
             current_channel = sender
-        said = ' '.join(message[2:])
-        params = message[3:]  # List of parameters (split by spaces)
+        
+        command = None
+        args = None
+        if message[2].startswith("."):
+            command = message[2].lstrip('.')
+            args = message[3:]  # List of parameters (split by spaces)
+        
+        full_text = ' '.join(message[2:])
+        
+        message_data = {
+            "sender": sender,
+            "channel": current_channel,
+            "full_text": full_text,
+            "command": command,
+            "args": args,
+        }
 
-        message_data = {}
-        message_data['sender']  = sender  
-        message_data['said'] = said
-        message_data['current_channel'] = current_channel
-        message_data['params'] = params
+        timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M")
+        print("{} [{}] {}: {}".format(timestamp, current_channel, sender, full_text))
+
         run_command(message_data)
 

@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
-import urllib, urllib2
+import urllib
+import requests
 import random
 
 from connection import irc_socket
 
-def fetch_url(url):
-    request = urllib2.Request(url)
-    request.add_header('User-Agent', 'Raisin IRC bot/0.1')
-    socket = urllib2.urlopen(request, None, 5)
-    return socket
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 5.1; rv:14.0) Gecko/20100101 Firefox/14.0.1', 
+    'Referer': 'http://google.com'
+}
+requests_session = requests.Session()
+requests_session.headers.update(headers)
 
 quotes_file = open('quotes', 'r')
 quotes = quotes_file.readlines()
@@ -29,8 +31,7 @@ def say(channel, message):
 
 # Send command to irc socket
 def execute(command):
-    print("sent {}".format(command + "\r\n"))
-    irc_socket.send(command + '\r\n')
+    irc_socket.send(command.encode("utf-8") + b"\r\n")
 
 def flatten(l):
     return [item for sublist in l for item in sublist]
