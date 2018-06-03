@@ -4,6 +4,7 @@ import urllib
 
 import wikipedia
 import wolfram
+import bank
 from irc_common import * 
 from calc import calculate
 from utils import requests_session, random_quote, say, execute, pastebin, sprunge
@@ -20,6 +21,9 @@ def run_command(message_data):
     # Reply to mention with a random quote
     if nickname in full_text:
         say(channel, random_quote(sender))
+
+    if len(full_text) > 10:
+        bank.make_money(sender)
 
     ## IRC commands ##
     def cringe_words(message):
@@ -38,7 +42,7 @@ def run_command(message_data):
         return
     elif command == "help":
         say(sender, "Search engines: google, wa, ddg, drae, dpd, en, es")
-        say(sender, "Misc: random [list], conv (unit) to (unit), fetch (wikipedia_article), link <start|get|check|stop>, calc (expression)")
+        say(sender, "Misc: sample [list], roll (number), ask (query), fetch (wikipedia_article), calc (expression)")
     # Google
     elif command == "google":
         say(channel, "https://www.google.com/search?q={}".format(search_term))
@@ -95,6 +99,10 @@ def run_command(message_data):
         article_name = ' '.join(args)
         extract = wikipedia.fetch(article_name)
         say(channel, extract)
+    # Bank
+    elif command == "bux":
+        amount = bank.ask_money(sender)
+        say(channel, "{} has {} bux".format(sender, amount))
 
     ## Owner commands ##
     if sender == owner:

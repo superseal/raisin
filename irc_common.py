@@ -1,6 +1,7 @@
 ### Common IRC functions and internal data
 from config import *
 from utils import say, execute
+import database
 
 logged_in = False
 
@@ -13,11 +14,13 @@ def add_user(channel, name):
     # Check if username has leading symbols (@, +, etc) and remove them
     if not name[0].isalnum():
         name = name[1:]
+
     if channel in users:
         users[channel].add(name)
-    # If it doesn't exist, create a new entry with the list [channel]
     else:
         users[channel] = set([name])
+
+    database.add_user(name)
 
 # Remove user from users dictionary
 def remove_user(channel, name):

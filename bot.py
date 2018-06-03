@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from connection import irc_socket
-from parser import read_line
 import sys
 import traceback
+
+import database
+from connection import irc_socket
+from parser import read_line
 
 buf = bytearray()
 while 1:
