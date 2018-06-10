@@ -16,5 +16,8 @@ owner = 'hurr'
 # Password (string)
 password = 'durr'
 
-# Wolfram Alpha appid
+# Wolfram Alpha appid (string)
 wolfram_api_key = 'AA00B0-CC611DDDDD'
+
+# Storage file name (string)
+database_name = 'new_database'

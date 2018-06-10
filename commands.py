@@ -42,7 +42,7 @@ def run_command(message_data):
         return
     elif command == "help":
         say(sender, "Search engines: google, wa, ddg, drae, dpd, en, es")
-        say(sender, "Misc: sample [list], roll (number), ask (query), fetch (wikipedia_article), calc (expression)")
+        say(sender, "Misc: sample [list], roll (number), ask (query), fetch (wikipedia_article), calc (expression), bux, sendbux (user) (amount)")
     # Google
     elif command == "google":
         say(channel, "https://www.google.com/search?q={}".format(search_term))
@@ -99,10 +99,20 @@ def run_command(message_data):
         article_name = ' '.join(args)
         extract = wikipedia.fetch(article_name)
         say(channel, extract)
-    # Bank
+    # Query money
     elif command == "bux":
         amount = bank.ask_money(sender)
-        say(channel, "{} has {} bux".format(sender, amount))
+        say(channel, "{} has {} newbux".format(sender, amount))
+    elif command == "sendbux":
+        if len(args) != 2:
+            say(channel, "no")
+            return
+        source, destination, amount = sender, args[0], args[1]
+        base = bank.transfer_money(source, destination, amount)
+        if base:
+            say(channel, "sent {} newbux to {}".format(amount, destination))
+        else:
+            say(channel, "no".format(sender))
 
     ## Owner commands ##
     if sender == owner:
