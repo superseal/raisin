@@ -5,9 +5,10 @@ import urllib
 import wikipedia
 import wolfram
 import bank
+import grass
 from irc_common import * 
 from calc import calculate
-from utils import requests_session, random_quote, say, execute, pastebin, sprunge
+from utils import requests_session, random_quote, pastebin, sprunge
 
 # Run user commands
 def run_command(message_data):
@@ -43,6 +44,7 @@ def run_command(message_data):
     elif command == "help":
         say(sender, "Search engines: google, wa, ddg, drae, dpd, en, es")
         say(sender, "Misc: sample [list], roll (number), ask (query), fetch (wikipedia_article), calc (expression), bux, sendbux (user) (amount)")
+        say(sender, "Grass: grass-new (chip-value), grass-start, grass-chips, grass-join, gr, gb (amount), gp, gs, grass-cancel")
     # Google
     elif command == "google":
         say(channel, "https://www.google.com/search?q={}".format(search_term))
@@ -99,21 +101,50 @@ def run_command(message_data):
         article_name = ' '.join(args)
         extract = wikipedia.fetch(article_name)
         say(channel, extract)
-    # Query money
+    # Check balance
     elif command == "bux":
         amount = bank.ask_money(sender)
-        say(channel, "{} has {} newbux".format(sender, amount))
+        say(channel, "{} has {:.2f} newbux".format(sender, amount))
+    # Transfer money
     elif command == "sendbux":
         if len(args) != 2:
-            say(channel, "no")
+            say(channel, "eh")
             return
         source, destination, amount = sender, args[0], args[1]
-        base = bank.transfer_money(source, destination, amount)
-        if base:
-            say(channel, "sent {} newbux to {}".format(amount, destination))
-        else:
-            say(channel, "no".format(sender))
-
+        if not amount.replace('.', '', 1).isdigit():
+            say(source, "numbers please")
+            return
+        bank.transfer_money(source, destination, float(amount))
+    elif command == "grass-new":
+        if len(args) < 1:
+            say(channel, "how much for each chip")
+            return
+        chip_value = args[0]
+        if not chip_value.replace('.', '', 1).isdigit():
+            say(source, "numbers please")
+            return
+        grass.new_game(sender, channel, float(chip_value))
+    elif command == "grass-join":
+        grass.add_player(sender, channel)
+    elif command == "grass-start":
+        grass.start(sender, channel)
+    elif command == "gr":
+        grass.play(sender, channel)
+    elif command == "gb":
+        if len(args) < 1:
+            say(channel, "how much are you betting")
+            return
+        bet = args[0]
+        if not bet.replace('.', '', 1).isdigit():
+            say(channel, "numbers please")
+            return
+        grass.bet(sender, bet, channel)
+    elif command == "gp":
+        grass.pass_turn(sender, channel)
+    elif command == "gs":
+        grass.print_chips(channel)
+    elif command == "grass-cancel":
+        grass.abort(channel)
     ## Owner commands ##
     if sender == owner:
         # Disconnect

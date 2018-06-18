@@ -1,11 +1,13 @@
 import time
+import datetime
 import math
 import sqlite3
 
 import config
 import database
+from irc_common import say
 
-TRANSFER_FEE_RATE = 0.05
+TRANSFER_FEE_RATE = 0.01
 
 database.add_user(config.nickname)
 
@@ -30,26 +32,28 @@ def make_money(sender):
         database.give_money(sender, amount)
 
 def ask_money(sender):
-    millis = database.ask_money(sender)
-    return math.ceil(millis / 1000 / 0.01) * 0.01
+    millis = database.ask_money(sender) / 1000
+    return math.ceil(millis / 0.01) * 0.01
 
 def transfer_money(source, destination, amount):
     if not database.user_exists(source) or not database.user_exists(destination):
-        return 0
-
-    if not amount.replace('.', '', 1).isdigit():
-        return 0
-
-    amount = float(amount) 
+        say(source, "who's that")
+        return False
 
     if ask_money(source) < amount * (1 + TRANSFER_FEE_RATE):
-        return 0
+        say(source, "you're poor lol")
+        return False
 
-    amount *= 1000
-    base = amount
-    # Round to nearest multiple of 10 cents
-    fee = math.ceil(amount * TRANSFER_FEE_RATE / 10) * 10
+    real_amount = amount * 1000
+
+    base = real_amount
+    # Round to nearest multiple of 2 cents
+    fee = math.ceil(real_amount * TRANSFER_FEE_RATE / 2) * 2
     database.take_money(source, base + fee)
     database.give_money(destination, base)
     database.give_money(config.nickname, fee)
-    return base
+    say(source, "sent {:.2f} newbux to {}".format(amount, destination))
+
+    timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M")
+    print("{} Transfer {} -> {}: {:.2f} bux ({:.2f} fee)".format(timestamp, source, destination, amount, fee / 1000))
+    return True

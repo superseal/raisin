@@ -1,6 +1,8 @@
 ### Common IRC functions and internal data
+import time
+
 from config import *
-from utils import say, execute
+from connection import irc_socket
 import database
 
 logged_in = False
@@ -31,3 +33,13 @@ def remove_user(channel, name):
 def bot_kick(channel, user, reason):
     execute('KICK %s %s :%s' % (channel, user, reason))
     remove_user(channel, user)
+
+# Send message to channel
+def say(channel, message):
+    line = "PRIVMSG {} :{}".format(channel, message)
+    execute(line)
+    time.sleep(0.2)
+
+# Send command to irc socket
+def execute(command):
+    irc_socket.send(command.encode("utf-8") + b"\r\n")

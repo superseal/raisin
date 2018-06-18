@@ -2,7 +2,6 @@ import time
 import datetime
 
 from irc_common import *
-from utils import execute
 from commands import run_command
 
 # Variables inside curly braces are optional

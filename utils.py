@@ -2,8 +2,7 @@
 import urllib
 import requests
 import random
-
-from connection import irc_socket
+import time
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 5.1; rv:14.0) Gecko/20100101 Firefox/14.0.1', 
@@ -25,13 +24,6 @@ def random_quote(sender):
         reply = '\x01%s\x01' % reply
     return reply.replace('%s', sender).replace('/me', 'ACTION')
 
-# Send message to channel
-def say(channel, message):
-    execute('PRIVMSG %s :%s' % (channel, message))
-
-# Send command to irc socket
-def execute(command):
-    irc_socket.send(command.encode("utf-8") + b"\r\n")
 
 def flatten(l):
     return [item for sublist in l for item in sublist]
