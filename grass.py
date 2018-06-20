@@ -18,7 +18,7 @@ class GrassStatus(Enum):
 owner = ""
 game_status = GrassStatus.FINISHED
 
-players = {}
+chips = {}
 turns = []
 counter = 0
 current_player = ""
@@ -28,20 +28,20 @@ chip_value = 0
 
 def print_chips(channel):
     if game_status in (GrassStatus.ROLLING, GrassStatus.WAITING_FOR_BET):
-        all_chips = ", ".join("{}: {} chips".format(name, chips) for name, chips in players.items())
+        all_chips = ", ".join("{}: {} chips".format(name.upper(), chips) for name, chips in chips.items())
         say(channel, all_chips)
         say(channel, "{} goes next, {} chips on the table".format(current_player, chips_on_table))
 
 def new_game(sender, channel, value):
-    global game_status, players, turns, counter, current_player, owner
+    global game_status, chips, turns, counter, current_player, owner
     global chip_value, chips_on_table
 
     if game_status is not GrassStatus.FINISHED:
-        say(channel, "finish this game first before starting a new one {}".format(game_status))
+        say(channel, "finish this game first before starting a new one")
         return
     
     game_status = GrassStatus.WAITING_FOR_PLAYERS
-    players = {}
+    chips = {}
     turns = []
     counter = 0
     current_player = ""
@@ -53,15 +53,15 @@ def new_game(sender, channel, value):
 
 def add_player(sender, channel):
     if game_status is not GrassStatus.WAITING_FOR_PLAYERS:
-        pass
+        return
 
     if bank.transfer_money(sender, config.nickname, INITIAL_CHIPS * chip_value):
         say(channel, "{} joins the game".format(sender))
     else:
         return
 
-    players.update({sender: INITIAL_CHIPS})
-    turns.append(sender)
+    chips.update({sender: INITIAL_CHIPS})
+    turns.insert(counter, sender)
     put_chips(sender, INITIAL_CHIPS_ON_TABLE)
 
 # Only the player who first joined the game can start and finish a game
@@ -102,17 +102,17 @@ def next_turn(channel):
         bot_play(channel)
 
 def kick(player, channel):
-    players.pop(player)
+    chips.pop(player)
     turns.remove(player)
 
 def put_chips(player, amount):
     global chips_on_table
-    players[player] -= amount
+    chips[player] -= amount
     chips_on_table += amount
 
 def take_chips(player, amount):
     global chips_on_table
-    players[player] += amount
+    chips[player] += amount
     chips_on_table -= amount
 
 def play(sender, channel):
@@ -129,7 +129,7 @@ def play(sender, channel):
     if roll in (1, 6):
         say(channel, "{} rolls {} and puts one chip on the table".format(current_player, roll))
         put_chips(current_player, 1)
-        if players[current_player] <= 0:
+        if chips[current_player] <= 0:
             say(channel, "{} is poor now lol".format(current_player))
             kick(current_player, channel)
         next_turn(channel)
@@ -158,7 +158,7 @@ def bet(sender, amount, channel):
         say(channel, "there are only {} chips on the table".format(chips_on_table))
         return
 
-    if amount > players[sender]:
+    if amount > chips[sender]:
         say(channel, "you can't bet more than what you have")
         return
 
@@ -166,7 +166,7 @@ def bet(sender, amount, channel):
     if roll <= last_roll:
         say(channel, "{} rolls {}, loses and puts {} chips on the table".format(current_player, roll, amount))
         put_chips(current_player, amount)
-        if players[current_player] <= 0:
+        if chips[current_player] <= 0:
             say(channel, "{} rubbed hands way too hard".format(current_player))
             kick(current_player, channel)
     else:
@@ -183,7 +183,7 @@ def pass_turn(sender, channel):
         game_status = GrassStatus.ROLLING
         next_turn(channel)
 
-# Cancel game and reimburse all players
+# Cancel game and reimburse all chips
 def abort(channel):
     global game_status
     
@@ -191,7 +191,7 @@ def abort(channel):
         say(channel, "no games to cancel")
         return
 
-    for player, chips in players.items():
+    for player, chips in chips.items():
         amount = chips * chip_value
         bank.transfer_money(config.nickname, player, amount)
         say(player, "you got {:.2f} newbux from grass".format(amount))
@@ -201,7 +201,7 @@ def abort(channel):
 
 # Graceful finish with a winner
 def finish(channel):
-    global game_status, players, turns
+    global game_status, chips, turns
     
     if game_status == GrassStatus.FINISHED:
         say(channel, "no games to finish")
@@ -210,8 +210,8 @@ def finish(channel):
     winner = turns[0]
     say(channel, "{} takes all {} chips from the table".format(winner, chips_on_table))
     take_chips(winner, chips_on_table)
-    bank.transfer_money(config.nickname, winner, players[winner] * chip_value)
-    players = {}
+    bank.transfer_money(config.nickname, winner, chips[winner] * chip_value)
+    chips = {}
     turns = []
     say(channel, "end of game")
     game_status = GrassStatus.FINISHED

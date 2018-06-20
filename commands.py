@@ -6,9 +6,10 @@ import wikipedia
 import wolfram
 import bank
 import grass
+import slots
 from irc_common import * 
 from calc import calculate
-from utils import requests_session, random_quote, pastebin, sprunge
+from utils import requests_session, random_quote, is_number, pastebin, sprunge
 
 # Run user commands
 def run_command(message_data):
@@ -44,7 +45,8 @@ def run_command(message_data):
     elif command == "help":
         say(sender, "Search engines: google, wa, ddg, drae, dpd, en, es")
         say(sender, "Misc: sample [list], roll (number), ask (query), fetch (wikipedia_article), calc (expression), bux, sendbux (user) (amount)")
-        say(sender, "Grass: grass-new (chip-value), grass-start, grass-chips, grass-join, gr, gb (amount), gp, gs, grass-cancel")
+        say(sender, "Grass: grass-new (chip-value), grass-start, grass-join, gr, gb (amount), gp, gs, grass-cancel")
+        say(sender, "Slots: slot-chips (amount), easy-slot, hard-slot, slot-cashout")
     # Google
     elif command == "google":
         say(channel, "https://www.google.com/search?q={}".format(search_term))
@@ -111,16 +113,17 @@ def run_command(message_data):
             say(channel, "eh")
             return
         source, destination, amount = sender, args[0], args[1]
-        if not amount.replace('.', '', 1).isdigit():
+        if not is_number(amount):
             say(source, "numbers please")
             return
         bank.transfer_money(source, destination, float(amount))
+    # Grass game 
     elif command == "grass-new":
         if len(args) < 1:
             say(channel, "how much for each chip")
             return
         chip_value = args[0]
-        if not chip_value.replace('.', '', 1).isdigit():
+        if not is_number(chip_value):
             say(source, "numbers please")
             return
         grass.new_game(sender, channel, float(chip_value))
@@ -135,7 +138,7 @@ def run_command(message_data):
             say(channel, "how much are you betting")
             return
         bet = args[0]
-        if not bet.replace('.', '', 1).isdigit():
+        if not is_number(bet):
             say(channel, "numbers please")
             return
         grass.bet(sender, bet, channel)
@@ -145,6 +148,22 @@ def run_command(message_data):
         grass.print_chips(channel)
     elif command == "grass-cancel":
         grass.abort(channel)
+    # Slot machine
+    elif command == "slot-chips":
+        if len(args) < 1:
+            say(channel, "how many are you buying")
+            return
+        amount = args[0]
+        if not is_number(amount):
+            say(channel, "numbers please")
+            return
+        slots.buy_chips(sender, channel, int(amount))
+    elif command == "easy-slot":
+        slots.play(sender, channel, slots.Games.EASY)
+    elif command == "hard-slot":
+        slots.play(sender, channel, slots.Games.HARD)
+    elif command == "slot-cashout":
+        slots.cash_out(sender, channel)
     ## Owner commands ##
     if sender == owner:
         # Disconnect

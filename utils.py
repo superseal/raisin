@@ -41,3 +41,6 @@ def sprunge(text):
     params = urllib.urlencode({'sprunge': text})
     paste = urllib.urlopen('http://sprunge.us', params).read()
     return paste.lstrip(' ')
+
+def is_number(message):
+    return message.replace('.', '', 1).isdigit() 
