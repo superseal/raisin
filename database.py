@@ -9,7 +9,7 @@ cursor.execute("""
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY,
     name VARCHAR(30),
-    money INTEGER DEFAULT 1
+    money INTEGER DEFAULT 1000
 )
 """)
 
