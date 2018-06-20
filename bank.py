@@ -28,7 +28,7 @@ def make_money(sender):
     epoch = int(time.time())
     power = repeating_digits(epoch)
     if power:
-        amount = 2 ** (power ** 2)
+        amount = 1000 * 2 ** (power - 1)
         database.give_money(sender, amount)
 
 def ask_money(sender):
