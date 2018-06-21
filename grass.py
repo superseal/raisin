@@ -28,7 +28,7 @@ chip_value = 0
 
 def print_chips(channel):
     if game_status in (GrassStatus.ROLLING, GrassStatus.WAITING_FOR_BET):
-        all_chips = ", ".join("{}: {} chips".format(name.upper(), chips) for name, chips in chips.items())
+        all_chips = ", ".join("{}: {} chips".format(name[:3], chips) for name, chips in chips.items())
         say(channel, all_chips)
         say(channel, "{} goes next, {} chips on the table".format(current_player, chips_on_table))
 
