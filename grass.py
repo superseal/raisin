@@ -191,8 +191,8 @@ def abort(channel):
         say(channel, "no games to cancel")
         return
 
-    for player, chips in chips.items():
-        amount = chips * chip_value
+    for player, current_chips in chips.items():
+        amount = current_chips * chip_value
         bank.transfer_money(config.nickname, player, amount)
         say(player, "you got {:.2f} newbux from grass".format(amount))
     
