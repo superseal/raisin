@@ -125,7 +125,7 @@ def play(sender, channel):
     if sender != current_player:
         return
 
-    roll = random.randrange(1, 6)
+    roll = random.randint(1, 6)
     if roll in (1, 6):
         say(channel, "{} rolls {} and puts one chip on the table".format(current_player, roll))
         put_chips(current_player, 1)
