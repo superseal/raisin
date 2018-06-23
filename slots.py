@@ -17,12 +17,12 @@ class Games(Enum):
 ### Easy slots
 EASY_REELS = (
     # S1   S2   S3
-    (0.1, 0.3, 0.6), # R1
-    (0.5, 0.3, 0.2), # R2
-    (0.1, 0.4, 0.5), # R3
+    (0.1, 0.4, 0.5), # R1
+    (0.1, 0.5, 0.4), # R2
+    (0.1, 0.4, 0.6), # R3
 )
-EASY_SYMBOLS = ["egg", "carrot", "grass"]
-EASY_PRIZES = (1000, 100, 10)
+EASY_SYMBOLS = ("egg", "carrot", "grass")
+EASY_PRIZES = (2000, 100, 40)
 EASY_BET = 10
 
 
@@ -30,11 +30,11 @@ EASY_BET = 10
 HARD_REELS = (
     # S1   S2   S3   S4
     (0.1, 0.3, 0.2, 0.4), # R1
-    (0.1, 0.2, 0.2, 0.5), # R2
-    (0.2, 0.2, 0.5, 0.1), # R3
+    (0.1, 0.2, 0.3, 0.4), # R2
+    (0.2, 0.2, 0.4, 0.2), # R3
 )
-HARD_SYMBOLS = ["satanium", "weed", "protein", "grape"]
-HARD_PRIZES = (12500, 1000, 500, 100)
+HARD_SYMBOLS = ("satanium", "weed", "protein", "grape")
+HARD_PRIZES = (12500, 1000, 500, 200)
 HARD_BET = 50
 
 
