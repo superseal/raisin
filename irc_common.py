@@ -38,7 +38,6 @@ def bot_kick(channel, user, reason):
 def say(channel, message):
     line = "PRIVMSG {} :{}".format(channel, message)
     execute(line)
-    time.sleep(0.2)
 
 # Send command to irc socket
 def execute(command):
