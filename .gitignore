@@ -100,5 +100,6 @@ ENV/
 # mypy
 .mypy_cache/
 
-config.py
+config/dev.py
+config/prod.py
 raisin.db

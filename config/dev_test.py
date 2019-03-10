@@ -1,14 +1,19 @@
 # -*- coding: utf-8 -*-
-# Change these values and rename to config.py before running for the first time
+
+#
+# [!] Test environment settings only. Load with EXEC=test python bot.py
+# Change these values and rename to prod.py before running for the first time
+#
+
 
 # IRC network (string)
 network = 'irc.freenode.net'
 
 # Channel list (string list)
-channels = ['#cat-v']
+channels = ['#testground', '#test']
 
 # Bot nickname (string)
-nickname = 'bunny'
+nickname = 'bunny-dev'
 
 # Owner nickname (string)
 owner = 'hurr'
