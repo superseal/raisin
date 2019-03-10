@@ -1,7 +1,9 @@
 import sys
 import random
+import importlib
 import urllib
 
+import config
 import wikipedia
 import wolfram
 import bank
@@ -21,7 +23,7 @@ def run_command(message_data):
     args = message_data["args"]
 
     # Reply to mention with a random quote
-    if nickname in full_text:
+    if config.nickname in full_text:
         say(channel, random_quote(sender))
 
     if len(full_text) > 10:
@@ -165,7 +167,7 @@ def run_command(message_data):
     elif command == "slot-cashout":
         slots.cash_out(sender, channel)
     ## Owner commands ##
-    if sender == owner:
+    if sender == config.owner:
         # Disconnect
         if command == "quit":
             execute("QUIT")
@@ -192,3 +194,8 @@ def run_command(message_data):
             if not reason:
                 reason = "huh"
             bot_kick(channel, user, reason)
+        # Module reloads
+        elif command == "reload":
+            module_name = args[0]
+            importlib.reload(sys.modules[module_name])
+            say(channel, "aight")
