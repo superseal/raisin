@@ -1,9 +1,8 @@
 ### Common IRC functions and internal data
 import time
 
-from config import *
-from connection import irc_socket
 import database
+from connection import irc_socket
 
 logged_in = False
 

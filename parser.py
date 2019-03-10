@@ -1,6 +1,7 @@
 import time
 import datetime
 
+import config
 from irc_common import *
 from commands import run_command
 
@@ -42,16 +43,16 @@ def parse_line(line):
     ### Numeric replies ###
     # Initial connection
     if not logged_in and (command == '439' or 'NOTICE' in command):
-        execute('NICK %s' % nickname)
-        execute('USER %s %s %s :%s' % (nickname, nickname, nickname, nickname))
-        # execute('NS GHOST %s %s' % (nickname, password))
+        execute('NICK %s' % config.nickname)
+        execute('USER %s %s %s :%s' % (config.nickname, config.nickname, config.nickname, config.nickname))
+        # execute('NS GHOST %s %s' % (config.nickname, config.password))
         logged_in = True
 
     # Start of MOTD
     elif command == '375':
-        execute('NS IDENTIFY %s' % password)
+        execute('NS IDENTIFY %s' % config.password)
         time.sleep(2)
-        for channel in channels:
+        for channel in config.channels:
             execute('JOIN %s' % channel)
 
     # NAMES list
@@ -69,14 +70,14 @@ def parse_line(line):
         current_channel = full_command[2]
         user = full_command[3]
         # Autojoin
-        if user == nickname:
+        if user == config.nickname:
             execute('JOIN %s' % current_channel)
         # User KICKs
         else:
             remove_user(user, current_channel)
 
     # User JOINs
-    elif command == 'JOIN' and sender != nickname:
+    elif command == 'JOIN' and sender != config.nickname:
         # message = ['JOIN', {':' + }#chan]
         current_channel = message[1].lstrip(':')
         add_user(current_channel, sender)
@@ -89,7 +90,7 @@ def parse_line(line):
 
     # User QUITs
     elif command == 'QUIT':
-        for channel in channels:
+        for channel in config.channels:
             remove_user(channel, sender)
 
     # User commands
@@ -98,7 +99,7 @@ def parse_line(line):
         message[2] = message[2].lstrip(':')
 
         current_channel = message[1]
-        if current_channel == nickname:
+        if current_channel == config.nickname:
             current_channel = sender
         
         command = None
