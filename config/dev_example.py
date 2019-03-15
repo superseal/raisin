@@ -2,7 +2,7 @@
 
 #
 # [!] Test environment settings only. Load with EXEC=test python bot.py
-# Change these values and rename to prod.py before running for the first time
+# Change these values and rename to dev.py before running for the first time
 #
 
 

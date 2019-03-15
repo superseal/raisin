@@ -1,6 +1,4 @@
 ### Common IRC functions and internal data
-import time
-
 import database
 from connection import irc_socket
 

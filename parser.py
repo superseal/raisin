@@ -26,7 +26,7 @@ def parse_line(line):
     global logged_in
 
     # Complete command (:name!username@host command {args} :args)
-    full_command = line.split()  # [:name!username@host, command{, args}, :args]
+    full_command = line.split(" ")  # [:name!username@host, command{, args}, :args]
 
     if len(full_command) < 2:
         return
@@ -119,7 +119,7 @@ def parse_line(line):
         }
 
         timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M")
-        print("{} [{}] {}: {}".format(timestamp, current_channel, sender, full_text))
+        print(f"{timestamp} [{current_channel}] {sender}: {full_text}")
 
         run_command(message_data)
 

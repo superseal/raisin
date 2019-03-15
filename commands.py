@@ -10,7 +10,7 @@ import wolfram
 import bank
 import grass
 import slots
-from irc_common import *
+from irc_common import users, execute
 from calc import calculate
 from utils import requests_session, random_quote, is_number, pastebin, sprunge
 
@@ -215,14 +215,14 @@ def run_command(message_data):
             sys.exit(0)
 
         # Send message from bot
-        elif command == "message_queue.add":
+        elif command == "say":
             if len(args) > 1:
                 message = ' '.join(args[1:])
                 message_queue.add(args[0], message)
 
         # Print userlist
         elif command == "users":
-            message_queue.add(channel, str(users))
+            message_queue.add(channel, str(irc_common.users))
 
         # Bot joins
         elif command == "join":
