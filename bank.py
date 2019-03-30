@@ -23,6 +23,7 @@ def repeating_digits(number):
             break
     return repeating_digits
 
+
 # Money is awarded to sender every time their message epoch has repeating digits 
 def make_money(sender):
     epoch = int(time.time())
@@ -31,9 +32,11 @@ def make_money(sender):
         amount = 1000 * 2 ** (power - 1)
         database.give_money(sender, amount)
 
+
 def ask_money(sender):
     millis = database.ask_money(sender) / 1000
     return math.ceil(millis / 0.01) * 0.01
+
 
 def transfer_money(source, destination, amount):
     if not database.user_exists(source) or not database.user_exists(destination):
@@ -52,8 +55,9 @@ def transfer_money(source, destination, amount):
     database.take_money(source, base + fee)
     database.give_money(destination, base)
     database.give_money(config.nickname, fee)
-    say(source, "sent {:.2f} newbux to {}".format(amount, destination))
+    say(source, f"sent {amount:.2f} newbux to {destination} ({fee} fee)")
 
     timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M")
-    print("{} Transfer {} -> {}: {:.2f} bux ({:.2f} fee)".format(timestamp, source, destination, amount, fee / 1000))
+    print(f"{timestamp} Transfer {source} -> {destination}: {amount:.2f} bux ({fee / 1000:.2f} fee)")
     return True
+

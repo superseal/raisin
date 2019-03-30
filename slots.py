@@ -1,3 +1,4 @@
+import sys
 import random
 import threading
 import time
@@ -71,8 +72,7 @@ def single_play(sender, channel, reels, symbols, prizes, bet):
 def auto_play(sender, channel, reels, symbols, prizes, bet):
     while chips[sender] > bet and sender in ongoing_games:
         single_play(sender, channel, reels, symbols, prizes, bet)
-        time.sleep(3)
-    import sys
+        time.sleep(1)
     sys.exit()
 
 def stop(sender, channel):

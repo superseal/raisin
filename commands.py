@@ -12,7 +12,7 @@ import grass
 import slots
 from irc_common import users, execute
 from calc import calculate
-from utils import requests_session, random_quote, is_number, pastebin, sprunge
+from utils import requests_session, random_quote, is_number, entropy
 
 # Run user commands
 def run_command(message_data):
@@ -22,15 +22,7 @@ def run_command(message_data):
     channel = message_data["channel"]
     command = message_data["command"]
     args = message_data["args"]
-
-    # Reply to mention with a random quote
-    if config.nickname in full_text:
-        message_queue.add(channel, random_quote(sender))
-
-    if len(full_text) > 10:
-        bank.make_money(sender)
-
-    ## IRC commands ##
+    
     def cringe_words(message):
         for w in ["xd", "spic", "cring", "derail"]:
             if w in "".join(c for c in "".join(message.lower().split()) if c.isalpha()): return True
@@ -39,58 +31,21 @@ def run_command(message_data):
     if sender == "eyy" and cringe_words(full_text):
         execute("KICK #bogota eyy ebin")
 
-    search_term = None
-    if args:
-        search_term = urllib.parse.quote_plus(" ".join(args))
-    
+    # Reply to mention with a random quote
+    if config.nickname in full_text:
+        message_queue.add(channel, random_quote(sender))
+
+    # Give bux to users
+    if 3.8 < entropy(full_text) < 4.2:
+        bank.make_money(sender)
+
     if not command:
         return
 
     elif command == "help":
-        message_queue.add(sender, "Search engines: google, wa, ddg, drae, dpd, en, es")
-        message_queue.add(sender, "Misc: pick [list], roll (number), ask (query), fetch (wikipedia_article), calc (expression), bux, sendbux (user) (amount)")
         message_queue.add(sender, "Grass: grass-new (chip-value), grass-start, grass-join, gr, gb (amount), gp, gs, grass-cancel")
         message_queue.add(sender, "Slots: slot-chips (amount), easy-slot <auto>, hard-slot <auto>, slot-stop, slot-cashout")
-
-    # Google
-    elif command == "google":
-        message_queue.add(channel, "https://www.google.com/search?q={}".format(search_term))
-        
-    # Wolfram Alpha
-    elif command == "wa":
-        message_queue.add(channel, "http://www.wolframalpha.com/input/?i={}".format(search_term))
-
-    # DuckDuckGo
-    elif command == "ddg":
-        message_queue.add(channel, "http://duckduckgo.com/?q={}".format(search_term))
-
-    # DRAE
-    elif command == "drae":
-        message_queue.add(channel, "http://lema.rae.es/drae/?val={}".format(search_term))
-
-    # DPD
-    elif command == "dpd":
-        message_queue.add(channel, "http://lema.rae.es/dpd/?key={}".format(search_term))
-
-    # Jisho kanji lookup
-    elif command == "kan":
-        message_queue.add(channel, "http://jisho.org/kanji/details/{}".format(search_term))
-
-    # EN > JP
-    elif command == "ei":
-        message_queue.add(channel, "http://jisho.org/words?jap=&eng={}&dict=edict".format(search_term))
-
-    # JP > EN
-    elif command == "ni":
-        message_queue.add(channel, "http://jisho.org/words?jap={}&eng=&dict=edict".format(search_term))
-
-    # EN > ES
-    elif command == "en":
-        message_queue.add(channel, "http://www.wordreference.com/es/translation.asp?tranword={}".format(search_term))
-
-    # ES > EN
-    elif command == "es":
-        message_queue.add(channel, "http://www.wordreference.com/es/en/translation.asp?spen={}".format(search_term))
+        message_queue.add(sender, "Misc: pick [list], roll (number), ask (query), fetch (wikipedia_article), calc (expression), bux, sendbux (user) (amount)")
 
     # Random choice
     elif command == "pick":
