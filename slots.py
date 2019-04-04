@@ -56,6 +56,10 @@ def start(sender, channel, game, auto=False):
     if chips[sender] < bet:
         message_queue.add(channel, "you only have {} chips, this game requires {} per play".format(current_chips, bet))
         return
+
+    if sender in ongoing_games:
+        message_queue.add(channel, "calm down")
+        return
     
     if auto:
         player_thread = threading.Thread(target=auto_play, args=(sender, channel, reels, symbols, prizes, bet))
@@ -72,7 +76,7 @@ def single_play(sender, channel, reels, symbols, prizes, bet):
 def auto_play(sender, channel, reels, symbols, prizes, bet):
     while chips[sender] > bet and sender in ongoing_games:
         single_play(sender, channel, reels, symbols, prizes, bet)
-        time.sleep(1)
+        time.sleep(1.5)
     sys.exit()
 
 def stop(sender, channel):

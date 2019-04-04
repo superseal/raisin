@@ -14,7 +14,7 @@ def dispatch():
         channel, message = ready_to_send.get()
         say(channel, message)
         ready_to_send.task_done()
-        time.sleep(0.2) # Avoid flooding the server 
+        time.sleep(0.5) # Avoid flooding the server 
 
 
 message_thread = threading.Thread(target=dispatch)
