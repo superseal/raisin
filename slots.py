@@ -74,6 +74,7 @@ def single_play(sender, channel, reels, symbols, prizes, bet):
     pay_prizes(sender, channel, roll, prizes, symbols)
 
 def auto_play(sender, channel, reels, symbols, prizes, bet):
+    print(f"Slots: {sender} started auto-play with {chips[sender]} chips")
     while chips[sender] > bet and sender in ongoing_games:
         single_play(sender, channel, reels, symbols, prizes, bet)
         time.sleep(1.5)
@@ -82,6 +83,7 @@ def auto_play(sender, channel, reels, symbols, prizes, bet):
 def stop(sender, channel):
     if sender in ongoing_games:
         ongoing_games.remove(sender)
+        print(f"Slots: {sender} stopped auto-play with {chips[sender]} chips")
         message_queue.add(channel, "why'd you stop, gentile")
     
 def slot_roll(sender, channel, reels, symbols):
@@ -103,7 +105,8 @@ def pay_prizes(sender, channel, roll, prizes, symbols):
 # Money
 def buy_chips(sender, channel, amount):
     if bank.transfer_money(sender, config.nickname, amount * CHIP_VALUE):
-        message_queue.add(channel, "{} bought {} chips".format(sender, amount))
+        print(f"Slots: {sender} bought {amount} chips")
+        message_queue.add(channel, f"{sender} bought {amount} chips")
     else:
         return
 
@@ -118,6 +121,7 @@ def cash_out(sender, channel):
     amount = current_chips * CHIP_VALUE
     bank.transfer_money(config.nickname, sender, amount)
     chips[sender] = 0
-    message_queue.add(sender, "you got {:.2f} newbux from slots".format(amount))
+    print(f"Slots: {sender} cashed out {current_chips} chips, {amount:.2f} bux")
+    message_queue.add(sender, f"you got {amount:.2f} newbux from slots")
 
 
