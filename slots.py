@@ -20,25 +20,25 @@ class Games(Enum):
 # Easy slots
 EASY_REELS = (
     # S1   S2   S3
-    (0.1, 0.4, 0.5), # R1
-    (0.1, 0.5, 0.4), # R2
-    (0.1, 0.4, 0.6), # R3
+    (0.1, 0.2, 0.7), # R1
+    (0.1, 0.7, 0.2), # R2
+    (0.1, 0.3, 0.6), # R3
 )
 EASY_SYMBOLS = ("egg", "carrot", "grass")
-EASY_PRIZES = (2000, 100, 40)
-EASY_BET = 10
+EASY_PRIZES = (20000, 1000, 420)
+EASY_BET = 100
 
 
 # Hard slots
 HARD_REELS = (
     # S1   S2   S3   S4
-    (0.1, 0.3, 0.2, 0.4), # R1
-    (0.1, 0.2, 0.3, 0.4), # R2
-    (0.2, 0.2, 0.4, 0.2), # R3
+    (0.1 , 0.45, 0.1 , 0.35), # R1
+    (0.1 , 0.2 , 0.25, 0.45), # R2
+    (0.05, 0.25, 0.35, 0.35), # R3
 )
 HARD_SYMBOLS = ("satanium", "weed", "protein", "grape")
-HARD_PRIZES = (12500, 1000, 500, 200)
-HARD_BET = 50
+HARD_PRIZES = (150000, 10000, 5000, 2500)
+HARD_BET = 500
 
 # Games
 ongoing_games = set()
@@ -75,7 +75,7 @@ def single_play(sender, channel, reels, symbols, prizes, bet):
 
 def auto_play(sender, channel, reels, symbols, prizes, bet):
     print(f"Slots: {sender} started auto-play with {chips[sender]} chips")
-    while chips[sender] > bet and sender in ongoing_games:
+    while chips[sender] >= bet and sender in ongoing_games:
         single_play(sender, channel, reels, symbols, prizes, bet)
         time.sleep(1.5)
     sys.exit()

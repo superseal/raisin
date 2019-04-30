@@ -5,7 +5,7 @@ import sqlite3
 
 import config
 import database
-from irc_common import say
+import message_queue
 
 TRANSFER_FEE_RATE = 0.01
 
@@ -40,11 +40,11 @@ def ask_money(sender):
 
 def transfer_money(source, destination, amount):
     if not database.user_exists(source) or not database.user_exists(destination):
-        say(source, "who's that")
+        message_queue.add(source, "who's that")
         return False
 
     if ask_money(source) < amount * (1 + TRANSFER_FEE_RATE):
-        say(source, "you're poor lol")
+        message_queue.add(source, "you're poor lol")
         return False
 
     real_amount = amount * 1000
@@ -55,9 +55,35 @@ def transfer_money(source, destination, amount):
     database.take_money(source, base + fee)
     database.give_money(destination, base)
     database.give_money(config.nickname, fee)
-    say(source, f"sent {amount:.2f} newbux to {destination} ({fee} fee)")
+    message_queue.add(source, f"sent {amount:.2f} newbux to {destination} ({fee / 1000:.2f} fee)")
 
     timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M")
     print(f"{timestamp} Transfer {source} -> {destination}: {amount:.2f} bux ({fee / 1000:.2f} fee)")
     return True
 
+
+def buy_pot(sender, channel, amount):
+    if transfer_money(sender, config.nickname, amount * POT_VALUE):
+        message_queue.add(channel, f"{sender} bought {amount} pots")
+    else:
+        message_queue.add(channel, f"that'll be {amount * POT_VALUE} bux plus taxes, {POT_VALUE} bux each one")
+
+    pots[sender] += amount
+
+
+def buy_weed_seed(sender, channel, amount):
+    if transfer_money(sender, config.nickname, amount * WEED_SEED_VALUE):
+        message_queue.add(channel, f"{sender} bought {amount} weed seeds")
+    else:
+        message_queue.add(channel, f"that'll be {amount * WEED_SEED_VALUE} bux plus taxes, {WEED_SEED_VALUE} bux each one")
+
+    weed_seeds[sender] += amount
+
+
+def buy_carrot_seed(sender, channel, amount):
+    if transfer_money(sender, config.nickname, amount * CARROT_SEED_VALUE):
+        message_queue.add(channel, f"{sender} bought {amount} carrot seeds")
+    else:
+        message_queue.add(channel, f"that'll be {amount * CARROT_SEED_VALUE} bux plus taxes, {CARROT_SEED_VALUE} bux each one")
+
+    carrot_seeds[sender] += amount
