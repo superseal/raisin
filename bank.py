@@ -56,34 +56,33 @@ def transfer_money(source, destination, amount):
     database.give_money(destination, base)
     database.give_money(config.nickname, fee)
     message_queue.add(source, f"sent {amount:.2f} newbux to {destination} ({fee / 1000:.2f} fee)")
+    message_queue.add(destination, f"received {amount:.2f} newbux from {source} (sender paid a {fee / 1000:.2f} fee)")
 
     timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M")
     print(f"{timestamp} Transfer {source} -> {destination}: {amount:.2f} bux ({fee / 1000:.2f} fee)")
     return True
 
 
-def buy_pot(sender, channel, amount):
-    if transfer_money(sender, config.nickname, amount * POT_VALUE):
-        message_queue.add(channel, f"{sender} bought {amount} pots")
-    else:
-        message_queue.add(channel, f"that'll be {amount * POT_VALUE} bux plus taxes, {POT_VALUE} bux each one")
+def islamic_gommunism(source, target, amount, channel, users):
+    if channel not in users.keys() or target == source:
+        message_queue.add(source, "smoke weed and protest against bankers")
+        return False
 
-    pots[sender] += amount
+    other_users = [user for user in users[channel] if user not in (target, config.nickname)]
 
+    if target not in users[channel]:
+        message_queue.add(source, "who that")
+        return False
 
-def buy_weed_seed(sender, channel, amount):
-    if transfer_money(sender, config.nickname, amount * WEED_SEED_VALUE):
-        message_queue.add(channel, f"{sender} bought {amount} weed seeds")
-    else:
-        message_queue.add(channel, f"that'll be {amount * WEED_SEED_VALUE} bux plus taxes, {WEED_SEED_VALUE} bux each one")
+    if not transfer_money(target, config.nickname, amount):
+        message_queue.add(source, f"{target} isn't ready for the intifada yet")
+        return False
 
-    weed_seeds[sender] += amount
+    if not transfer_money(source, config.nickname, amount):
+        # Do nothing and fail
+        return False
 
+    for user in other_users:
+        transfer_money(config.nickname, user, amount / len(other_users))
 
-def buy_carrot_seed(sender, channel, amount):
-    if transfer_money(sender, config.nickname, amount * CARROT_SEED_VALUE):
-        message_queue.add(channel, f"{sender} bought {amount} carrot seeds")
-    else:
-        message_queue.add(channel, f"that'll be {amount * CARROT_SEED_VALUE} bux plus taxes, {CARROT_SEED_VALUE} bux each one")
-
-    carrot_seeds[sender] += amount
+    message_queue.add(channel, "alhamdulillah")

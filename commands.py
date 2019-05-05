@@ -31,12 +31,19 @@ def run_command(message_data):
     if sender == "eyy" and cringe_words(full_text):
         execute("KICK #bogota eyy ebin")
 
+    # Refuse to do anything if not well fed by the users
+    """
+    if not food.enough(sender):
+        message_queue.add("nah")
+        return
+    """
+
     # Reply to mention with a random quote
-    if config.nickname in full_text:
+    if config.nickname in full_text and sender != config.nickname:
         message_queue.add(channel, random_quote(sender))
 
     # Give bux to users
-    if 3.8 < entropy(full_text) < 4.2:
+    if 3.6 <= entropy(full_text) <= 4.2:
         bank.make_money(sender)
 
     if not command:
@@ -45,7 +52,7 @@ def run_command(message_data):
     elif command == "help":
         message_queue.add(sender, "Grass: grass-new (chip-value), grass-start, grass-join, gr, gb (amount), gp, gs, grass-cancel")
         message_queue.add(sender, "Slots: slot-chips (amount), easy-slot <auto>, hard-slot <auto>, slot-stop, slot-cashout")
-        message_queue.add(sender, "Misc: pick [list], roll (number), ask (query), fetch (wikipedia_article), calc (expression), bux, sendbux (user) (amount)")
+        message_queue.add(sender, "Misc: pick [list], roll (number), ask (query), fetch (wikipedia_article), calc (expression), bux, sendbux (user) (amount), sharia (target) (amount)")
 
     # Random choice
     elif command == "pick":
@@ -93,6 +100,17 @@ def run_command(message_data):
             message_queue.add(source, "numbers please")
             return
         bank.transfer_money(source, destination, float(amount))
+
+    # Redistribute wealth
+    elif command == "sharia":
+        if len(args) != 2:
+            message_queue.add(channel, "eh")
+            return
+        source, target, amount = sender, args[0], args[1]
+        if not is_number(amount):
+            message_queue.add(source, "numbers please")
+            return
+        bank.islamic_gommunism(source, target, float(amount), channel, users)
 
     # Grass game 
     elif command == "grass-new":
@@ -177,7 +195,7 @@ def run_command(message_data):
 
         # Print userlist
         elif command == "users":
-            message_queue.add(channel, str(irc_common.users))
+            message_queue.add(channel, str(users))
 
         # Bot joins
         elif command == "join":
