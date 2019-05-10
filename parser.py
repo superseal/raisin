@@ -118,7 +118,7 @@ def parse_line(line):
             "args": args,
         }
 
-        timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M")
+        timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
         print(f"{timestamp} [{current_channel}] {sender}: {full_text}")
 
         run_command(message_data)

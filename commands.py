@@ -43,8 +43,7 @@ def run_command(message_data):
         message_queue.add(channel, random_quote(sender))
 
     # Give bux to users
-    if 3.6 <= entropy(full_text) <= 4.2:
-        bank.make_money(sender)
+    bank.make_money(sender, full_text)
 
     if not command:
         return

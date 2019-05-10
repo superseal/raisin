@@ -6,10 +6,13 @@ import sqlite3
 import config
 import database
 import message_queue
+from utils import entropy
 
 TRANSFER_FEE_RATE = 0.01
 
 database.add_user(config.nickname)
+
+bux_log = open("bux.log", "w")
 
 # Amount of repeating figures starting from the least significant one
 def repeating_digits(number):
@@ -25,12 +28,18 @@ def repeating_digits(number):
 
 
 # Money is awarded to sender every time their message epoch has repeating digits 
-def make_money(sender):
-    epoch = int(time.time())
-    power = repeating_digits(epoch)
-    if power:
-        amount = 1000 * 2 ** (power - 1)
-        database.give_money(sender, amount)
+def make_money(sender, full_text):
+    text_entropy = entropy(full_text)
+
+    if 3.6 <= text_entropy <= 4.2:
+        epoch = int(time.time())
+        power = repeating_digits(epoch)
+        if power:
+            amount = 1000 * 2 ** (power - 1)
+            database.give_money(sender, amount)
+
+            timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+            bux_log.write(f"{timestamp} {epoch} - P{power} E{text_entropy:.2f} - {amount/1000} bux - {sender} - {full_text}")
 
 
 def ask_money(sender):
@@ -40,7 +49,7 @@ def ask_money(sender):
 
 def transfer_money(source, destination, amount):
     if not database.user_exists(source) or not database.user_exists(destination):
-        message_queue.add(source, "who's that")
+        message_queue.add(source, "who that")
         return False
 
     if ask_money(source) < amount * (1 + TRANSFER_FEE_RATE):
@@ -70,7 +79,7 @@ def islamic_gommunism(source, target, amount, channel, users):
 
     other_users = [user for user in users[channel] if user not in (target, config.nickname)]
 
-    if target not in users[channel]:
+    if not database.user_exists(source) or not database.user_exists(destination):
         message_queue.add(source, "who that")
         return False
 

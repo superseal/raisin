@@ -17,17 +17,22 @@ def add_user(name):
     if not cursor.execute("SELECT id FROM users WHERE name = ?", (name, )).fetchall():
         cursor.execute("INSERT INTO users(name) VALUES (?)", (name, ))
 
+
 def user_exists(name):
     result = cursor.execute("SELECT name FROM users WHERE name = ?", (name, )).fetchall()
     return bool(result)
 
+
+# Money
 def give_money(sender, amount):
     cursor.execute("UPDATE users SET money = money + ? WHERE name = ?", (amount, sender))
     conn.commit()
 
+
 def take_money(sender, amount):
     cursor.execute("UPDATE users SET money = money - ? WHERE name = ?", (amount, sender))
     conn.commit()
+
 
 def ask_money(sender):
     result = cursor.execute("SELECT money FROM users WHERE name = ?", (sender, )).fetchone()
