@@ -6,13 +6,14 @@ import sqlite3
 import config
 import database
 import message_queue
-from utils import entropy
+from utils import entropy, logger
+
+bank_logger = logger("bank")
+bux_logger = logger("bux")
 
 TRANSFER_FEE_RATE = 0.01
 
 database.add_user(config.nickname)
-
-bux_log = open("bux.log", "w")
 
 # Amount of repeating figures starting from the least significant one
 def repeating_digits(number):
@@ -30,16 +31,15 @@ def repeating_digits(number):
 # Money is awarded to sender every time their message epoch has repeating digits 
 def make_money(sender, full_text):
     text_entropy = entropy(full_text)
-
+ 
     if 3.6 <= text_entropy <= 4.2:
         epoch = int(time.time())
         power = repeating_digits(epoch)
         if power:
-            amount = 1000 * 2 ** (power - 1)
+            amount = 1000 * 5 ** power
             database.give_money(sender, amount)
 
-            timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-            bux_log.write(f"{timestamp} {epoch} - P{power} E{text_entropy:.2f} - {amount/1000} bux - {sender} - {full_text}")
+            bux_logger.debug(f"{epoch} - P{power} E{text_entropy:.2f} - {amount/1000} bux - {sender} - {full_text}")
 
 
 def ask_money(sender):
@@ -67,8 +67,7 @@ def transfer_money(source, destination, amount):
     message_queue.add(source, f"sent {amount:.2f} newbux to {destination} ({fee / 1000:.2f} fee)")
     message_queue.add(destination, f"received {amount:.2f} newbux from {source} (sender paid a {fee / 1000:.2f} fee)")
 
-    timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M")
-    print(f"{timestamp} Transfer {source} -> {destination}: {amount:.2f} bux ({fee / 1000:.2f} fee)")
+    bank_logger.info(f"Transfer {source} -> {destination}: {amount:.2f} bux ({fee / 1000:.2f} fee)")
     return True
 
 
@@ -79,7 +78,7 @@ def islamic_gommunism(source, target, amount, channel, users):
 
     other_users = [user for user in users[channel] if user not in (target, config.nickname)]
 
-    if not database.user_exists(source) or not database.user_exists(destination):
+    if not database.user_exists(source) or not database.user_exists(target):
         message_queue.add(source, "who that")
         return False
 

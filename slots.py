@@ -8,6 +8,9 @@ from enum import Enum
 import config
 import bank
 import message_queue
+from utils import logger
+
+slots_logger = logger("slots")
 
 chips = defaultdict(int)
 
@@ -43,6 +46,7 @@ HARD_BET = 500
 # Games
 ongoing_games = set()
 
+
 def start(sender, channel, game, auto=False):
     if game == Games.EASY:
         reels, symbols, prizes, bet = EASY_REELS, EASY_SYMBOLS, EASY_PRIZES, EASY_BET
@@ -68,30 +72,35 @@ def start(sender, channel, game, auto=False):
     else:
         single_play(sender, channel, reels, symbols, prizes, bet)
 
+
 def single_play(sender, channel, reels, symbols, prizes, bet):
     chips[sender] -= bet
     roll = slot_roll(sender, channel, reels, symbols)
     pay_prizes(sender, channel, roll, prizes, symbols)
 
+
 def auto_play(sender, channel, reels, symbols, prizes, bet):
-    print(f"Slots: {sender} started auto-play with {chips[sender]} chips")
+    slots_logger.info(f"{sender} started auto-play with {chips[sender]} chips")
     while chips[sender] >= bet and sender in ongoing_games:
         single_play(sender, channel, reels, symbols, prizes, bet)
         time.sleep(1.5)
     sys.exit()
 
+
 def stop(sender, channel):
     if sender in ongoing_games:
         ongoing_games.remove(sender)
-        print(f"Slots: {sender} stopped auto-play with {chips[sender]} chips")
+        slots_logger.info(f"{sender} stopped auto-play with {chips[sender]} chips")
         message_queue.add(channel, "why'd you stop, gentile")
-    
+
+
 def slot_roll(sender, channel, reels, symbols):
     chips_left = chips[sender]
     roll = [random.choices(symbols, reel_probs)[0] for reel_probs in reels]
     text_result = "[{}], {} chips left".format(" - ".join(roll), chips_left)
     message_queue.add(channel, text_result)
     return roll
+
 
 def pay_prizes(sender, channel, roll, prizes, symbols):
     for index, symbol in enumerate(symbols):
@@ -105,12 +114,13 @@ def pay_prizes(sender, channel, roll, prizes, symbols):
 # Money
 def buy_chips(sender, channel, amount):
     if bank.transfer_money(sender, config.nickname, amount * CHIP_VALUE):
-        print(f"Slots: {sender} bought {amount} chips")
+        slots_logger.info(f"{sender} bought {amount} chips")
         message_queue.add(channel, f"{sender} bought {amount} chips")
     else:
         return
 
     chips[sender] += amount
+
 
 def cash_out(sender, channel):
     if chips[sender] == 0:
@@ -121,7 +131,6 @@ def cash_out(sender, channel):
     amount = current_chips * CHIP_VALUE
     bank.transfer_money(config.nickname, sender, amount)
     chips[sender] = 0
-    print(f"Slots: {sender} cashed out {current_chips} chips, {amount:.2f} bux")
+    slots_logger.info(f"{sender} cashed out {current_chips} chips, {amount:.2f} bux")
     message_queue.add(sender, f"you got {amount:.2f} newbux from slots")
-
 

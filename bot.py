@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import sys
-import traceback
 
-import database
+from utils import logger
 from connection import irc_socket
 from parser import read_line
 
+root_logger = logger("bot")
 buf = bytearray()
+
 while 1:
     data = irc_socket.recv(4096)
     buf.extend(data)
@@ -21,8 +22,7 @@ while 1:
         if len(line) > 0:
             try:
                 read_line(line)
+            except KeyboardInterrupt:
+                sys.exit(0)
             except Exception as derp:
-                for frame in traceback.extract_tb(sys.exc_info()[2]):
-                    fname, lineno, fn, text = frame
-                    print("{}:{}".format(fname, lineno))
-                print('[!] {}'.format(derp))
+                root_logger.exception("Exception occurred", exc_info=True)

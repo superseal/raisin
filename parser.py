@@ -1,11 +1,11 @@
 import time
-import datetime
 
 import config
 from irc_common import *
 from commands import run_command
+from utils import logger
 
-# Variables inside curly braces are optional
+parser_logger = logger("parser")
 
 # Read line and execute commands
 def read_line(line):
@@ -22,6 +22,7 @@ def read_line(line):
             execute('PONG %s\r\n' % line.split()[1])
 
 # Parse messages received from IRC server
+# Variables inside curly braces are optional
 def parse_line(line):
     global logged_in
 
@@ -118,8 +119,6 @@ def parse_line(line):
             "args": args,
         }
 
-        timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-        print(f"{timestamp} [{current_channel}] {sender}: {full_text}")
-
+        parser_logger.info(f"[{current_channel}] {sender}: {full_text}")
         run_command(message_data)
 

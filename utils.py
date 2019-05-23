@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
+import os
 import urllib
 import requests
 import random
 import time
 import math
+import logging
 from collections import Counter
+
+os.makedirs("logs", exist_ok=True)
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 5.1; rv:14.0) Gecko/20100101 Firefox/14.0.1', 
@@ -57,3 +61,27 @@ def entropy(message):
     counts = Counter(message)
     l = len(message)
     return -sum(count / l * math.log(count / l, 2) for count in counts.values())
+
+
+def logger(name):
+    console_formatting_string = "%(asctime)s %(name)s: %(message)s"
+    if name in ("bot", "parser"):
+        console_formatting_string = "%(asctime)s %(message)s"
+    
+    console_formatter = logging.Formatter(console_formatting_string)
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(console_formatter)
+    console_handler.setLevel(logging.INFO)
+     
+    file_formatter = logging.Formatter("%(asctime)s %(message)s")
+    file_handler = logging.FileHandler(f"logs/{name}.log")
+    file_handler.setFormatter(file_formatter)
+    file_handler.setLevel(logging.DEBUG)
+    
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(console_handler)
+    logger.addHandler(file_handler)
+
+    return logger
+
