@@ -26,7 +26,7 @@ def contains(string, set):
 
 # Use float casts to avoid expensive computations
 def fix(expression):
-    regex = re.compile('(?P<num>[-]?([0-9]*\.)?[0-9]+)') # Detect numbers
+    regex = re.compile('(?P<num>([0-9]*\.)?[0-9]+)') # Detect numbers
     return regex.sub('float(' + '\g<num>' + ')', expression)
 
 # Evaluate mathematical expression from string
