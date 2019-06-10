@@ -94,6 +94,15 @@ def parse_line(line):
         for channel in config.channels:
             remove_user(channel, sender)
 
+    # User NICKs
+    elif command == 'NICK':
+        # message = ['NICK', ':' + new_nickname]
+        new_nickname = message[1].lstrip(':')
+        for channel, nicks in users.items():
+            if sender in nicks:
+                remove_user(channel, sender)
+                add_user(channel, new_nickname)
+
     # User commands
     elif command == 'PRIVMSG':
         # message = ['PRIVMSG', #chan, ':' + word1, word2, ...]
