@@ -81,13 +81,13 @@ def islamic_gommunism(source, target, amount, channel, users):
     if not database.user_exists(source) or not database.user_exists(target):
         message_queue.add(source, "who that")
         return False
+    
+    if not transfer_money(source, config.nickname, amount):
+        # Do nothing and fail
+        return False
 
     if not transfer_money(target, config.nickname, amount):
         message_queue.add(source, f"{target} isn't ready for the intifada yet")
-        return False
-
-    if not transfer_money(source, config.nickname, amount):
-        # Do nothing and fail
         return False
 
     for user in other_users:
