@@ -1,6 +1,6 @@
-import time
 import sqlite3
 import threading
+import time
 
 conn = sqlite3.connect("raisin.db")
 cursor = conn.cursor()

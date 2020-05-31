@@ -1,15 +1,18 @@
 import time
 
-import config
-from irc_common import *
-from commands import run_command
-from utils import logger
+from raisin import config, commands
+from raisin.irc import actions, users
+from raisin.utils import logger
+
 
 parser_logger = logger("parser")
 
+logged_in = False
+
+
 # Read line and execute commands
-def read_line(line):
-    line = line.decode("utf-8")
+def read_line(line: str) -> None:
+    line = line.decode('utf-8')
 
     global logged_in
 
@@ -19,23 +22,26 @@ def read_line(line):
     else:
         # Pong
         if 'PING' in line:
-            execute('PONG %s\r\n' % line.split()[1])
+            actions.execute(f'PONG {line.split()[1]}\r\n')
+
 
 # Parse messages received from IRC server
 # Variables inside curly braces are optional
-def parse_line(line):
+def parse_line(line: str) -> None:
     global logged_in
 
-    # Complete command (:name!username@host command {args} :args)
-    full_command = line.split(" ")  # [:name!username@host, command{, args}, :args]
+    # Complete command [:name!username@host command {args} :args]
+    full_command = line.split(' ')  # [:name!username@host, command{, args}, :args]
 
     if len(full_command) < 2:
         return
 
     # Sender info (:name!username@host)
-    sender_info = full_command[0]
-    sender_info = sender_info.lstrip(':').split('!')  # [name, username@host]
-    sender = sender_info[0]  # name
+    sender_info = full_command[0].lstrip(':').split('!')  # [name, username@host]
+
+    sender = sender_info[0]
+    if len(sender_info) == 2:
+        host = sender_info[1]
 
     # Message and parameters (command {args} :args)
     message = full_command[1:]
@@ -44,27 +50,27 @@ def parse_line(line):
     ### Numeric replies ###
     # Initial connection
     if not logged_in and (command == '439' or 'NOTICE' in command):
-        execute('NICK %s' % config.nickname)
-        execute('USER %s %s %s :%s' % (config.nickname, config.nickname, config.nickname, config.nickname))
-        # execute('NS GHOST %s %s' % (config.nickname, config.password))
+        actions.execute(f'NICK {config.nickname}')
+        actions.execute(f'USER {config.nickname} {config.nickname} {config.nickname} :{config.nickname}')
+        # actions.execute(f'NS GHOST {config.nickname} {config.password}')
         logged_in = True
 
     # Start of MOTD
     elif command == '375':
-        execute('NS IDENTIFY %s' % config.password)
+        actions.execute(f'NS IDENTIFY {config.password}')
         time.sleep(2)
         for channel in config.channels:
-            execute('JOIN %s' % channel)
+            actions.join(channel)
 
     # NAMES list
     elif command == '353':
-        # message = ['353', bot_nickname, '=', #chan, :nick1, nick2, nick3]
+        # message = ('353', bot_nickname, '=', #chan, :nick1, nick2, nick3)
         channel = message[3]  # #chan
         message[4] = message[4].lstrip(':')  # nick1
         names_list = message[4:]  # [nick1, nick2, nick3]
 
         for name in names_list:
-            add_user(channel, name)
+            users.add(channel, name)
 
     ### Handle common messages ###
     elif command == 'KICK':
@@ -72,62 +78,56 @@ def parse_line(line):
         user = full_command[3]
         # Autojoin
         if user == config.nickname:
-            execute('JOIN %s' % current_channel)
+            actions.join(current_channel)
         # User KICKs
         else:
-            remove_user(user, current_channel)
+            users.remove(user, current_channel)
 
     # User JOINs
     elif command == 'JOIN' and sender != config.nickname:
-        # message = ['JOIN', {':' + }#chan]
+        # message = ('JOIN', {':' + }#chan)
         current_channel = message[1].lstrip(':')
-        add_user(current_channel, sender)
+        users.add(current_channel, sender)
 
     # User PARTs
     elif command == 'PART':
-        # message = ['PART', #chan, ':' + reason]
+        # message = ('PART', #chan, ':' + reason)
         current_channel = message[1]
-        remove_user(current_channel, sender)
+        users.remove(current_channel, sender)
 
     # User QUITs
     elif command == 'QUIT':
         for channel in config.channels:
-            remove_user(channel, sender)
+            users.remove(channel, sender)
 
     # User NICKs
     elif command == 'NICK':
-        # message = ['NICK', ':' + new_nickname]
+        # message = ('NICK', ':' + new_nickname)
         new_nickname = message[1].lstrip(':')
         for channel, nicks in users.items():
             if sender in nicks:
-                remove_user(channel, sender)
-                add_user(channel, new_nickname)
+                users.remove(channel, sender)
+                users.add(channel, new_nickname)
 
     # User commands
     elif command == 'PRIVMSG':
-        # message = ['PRIVMSG', #chan, ':' + word1, word2, ...]
-        message[2] = message[2].lstrip(':')
-
+        # message = ('PRIVMSG', #chan, ':' + word1, word2, ...)
         current_channel = message[1]
         if current_channel == config.nickname:
             current_channel = sender
+
+        message[2] = message[2].lstrip(':')
         
         command = None
         args = None
-        if message[2].startswith("."):
+        full_text = ' '.join(message[2:])
+
+        if message[2].startswith('.'):
             command = message[2].lstrip('.')
             args = message[3:]  # List of parameters (split by spaces)
+            if len(message) > 3:
+                full_text = ' '.join(message[3:])
         
-        full_text = ' '.join(message[2:])
-        
-        message_data = {
-            "sender": sender,
-            "channel": current_channel,
-            "full_text": full_text,
-            "command": command,
-            "args": args,
-        }
-
-        parser_logger.info(f"[{current_channel}] {sender}: {full_text}")
-        run_command(message_data)
+        parser_logger.info(f'[{current_channel}] {sender}: {full_text}')
+        commands.run(sender, current_channel, full_text, command, args)
 

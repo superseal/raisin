@@ -1,7 +1,9 @@
 # from __future__ import print_function
-from random import randrange, randint, sample, uniform
-from utils import flatten, say, sprunge
+from random import randint, randrange, sample, uniform
 from threading import Timer
+
+from utils import flatten, say, sprunge
+
 
 class Cell():
     def __init__(self, biome):

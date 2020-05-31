@@ -1,5 +1,5 @@
-import random
 import itertools
+import random
 
 width, height = 40, 40
 byteboard = bytearray(width * height * 2)

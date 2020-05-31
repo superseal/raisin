@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 import sys
 
-from utils import logger
-from connection import irc_socket
-from parser import read_line
+from raisin.irc.connection import irc_socket
+from raisin.irc.parser import read_line
+from raisin.utils import logger
 
 root_logger = logger("bot")
 buf = bytearray()

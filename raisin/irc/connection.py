@@ -1,7 +1,7 @@
 import socket
 import ssl
 
-import config 
+from raisin import config
 
 # Connect using SSL
 port = 6697

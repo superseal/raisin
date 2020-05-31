@@ -1,7 +1,7 @@
+import Queue
 import select
 import socket
 import sys
-import Queue
 import time
 
 # Create a TCP/IP socket

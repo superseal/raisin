@@ -1,10 +1,10 @@
  # -*- coding: utf8 -*-
 
 import json
-import urllib
 import re
+import urllib
 
-from utils import requests_session
+from raisin.utils import requests_session
 
 # Wikipedia language code
 language = 'en'

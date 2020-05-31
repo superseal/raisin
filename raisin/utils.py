@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
+import logging
+import math
 import os
-import urllib
-import requests
 import random
 import time
-import math
-import logging
+import urllib
 from collections import Counter
+
+import requests
 
 os.makedirs("logs", exist_ok=True)
 
@@ -17,7 +18,7 @@ headers = {
 requests_session = requests.Session()
 requests_session.headers.update(headers)
 
-quotes_file = open('quotes', 'r')
+quotes_file = open('raisin/quotes', 'r')
 quotes = quotes_file.readlines()
 quote_index = 0
 random.shuffle(quotes)
@@ -84,4 +85,3 @@ def logger(name):
     logger.addHandler(file_handler)
 
     return logger
-
