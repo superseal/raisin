@@ -8,12 +8,13 @@ from raisin.utils import logger
 
 root_logger = logger("bot")
 buf = bytearray()
+BUF_SIZE = 4096
 
 while 1:
-    data = irc_socket.recv(4096)
+    data = irc_socket.recv(BUF_SIZE)
     buf.extend(data)
     if not data:
-        print("[!] Server closed connection, closing")
+        root_logger.info("[!] Server closed connection, closing")
         sys.exit(1)
 
     # Parse lines only ending in \r\n, keep rest in buffer 
